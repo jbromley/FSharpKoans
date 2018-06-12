@@ -66,9 +66,34 @@ module ``about the stock example`` =
         let header = splitCommas stockData.[0]
         AssertEquality header [|"Date"; "Open"; "High"; "Low"; "Close"; "Volume"; "Adj Close"|]
         
+    type StockQuote = {
+        Date: string;
+        Open: double;
+        High: double;
+        Low: double;
+        Close:double;
+        Volume: int;
+        AdjClose: double}
 
+    let parseQuote (quote: string) =
+        let quoteStrings = splitCommas quote
+        let numbers = Seq.skip 1 quoteStrings |> Seq.map System.Double.Parse |> Seq.toArray<double>
+        { Date = quoteStrings.[0];
+          Open = numbers.[0];
+          High = numbers.[1];
+          Low = numbers.[2];
+          Close = numbers.[3];
+          Volume = int numbers.[4];
+          AdjClose = numbers.[5] }
+
+    let calculateVariance (q: StockQuote) =
+        (q.Date, abs(q.Close - q.Open))
+
+    let findMaxVariance (stockData: string list) =
+         stockData |> Seq.skip 1 |> Seq.map parseQuote |> Seq.map calculateVariance |> Seq.maxBy (fun v -> snd v) |> fst
+         
     [<Koan>]
     let YouGotTheAnswerCorrect() =
-        let result =  __
+        let result =  findMaxVariance stockData
         
         AssertEquality "2012-03-13" result
